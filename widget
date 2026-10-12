@@ -1,0 +1,545 @@
+class Product {
+  final String id;
+  final String name;
+  final double price;
+  final String imageUrl;
+  int quantity;
+
+  Product({
+    required this.id,
+    required this.name,
+    required this.price,
+    required this.imageUrl,
+    this.quantity = 1,
+  });
+}
+
+import 'package:flutter/material.dart';
+import 'product.dart';
+
+class CartItemWidget extends StatelessWidget {
+  final Product product;
+  final VoidCallback onDelete;
+
+  const CartItemWidget({
+    Key? key,
+    required this.product,
+    required this.onDelete,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          children: [
+            // Ảnh sản phẩm
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: Image.network(
+                product.imageUrl,
+                width: 60,
+                height: 60,
+                fit: BoxFit.cover,
+                errorBuilder: (, _, _) => const Icon(Icons.shoe_prints, size: 40),
+              ),
+            ),
+            const SizedBox(width: 12),
+            // Thông tin sản phẩm
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    product.name,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Giá: ${product.price} \$',
+                    style: const TextStyle(color: Colors.green, fontSize: 13),
+                  ),
+                ],
+              ),
+            ),
+            // Số lượng & Nút xóa
+            Text(
+              'Số lượng: ${product.quantity}',
+              style: const TextStyle(color: Colors.blue, fontSize: 13),
+            ),
+            IconButton(
+              icon: const Icon(Icons.delete, color: Colors.red),
+              onPressed: onDelete,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+import 'package:flutter/material.dart';
+import 'product.dart';
+
+class ProductCardWidget extends StatelessWidget {
+  final Product product;
+  final VoidCallback onAddToCart;
+
+  const ProductCardWidget({
+    Key? key,
+    required this.product,
+    required this.onAddToCart,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 140,
+      margin: const EdgeInsets.only(right: 12),
+      padding: const EdgeInsets.all(😎,
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Ảnh sản phẩm
+          ClipRRect(
+            borderRadius: BorderRadius.circular(😎,
+            child: Image.network(
+              product.imageUrl,
+              height: 80,
+              width: double.infinity,
+              fit: BoxFit.cover,
+              errorBuilder: (, _, _) => const Icon(Icons.shoe_prints, size: 50),
+            ),
+          ),
+          const SizedBox(height: 😎,
+          // Tên sản phẩm
+          Text(
+            product.name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+          ),
+          // Giá sản phẩm
+          Text(
+            '${product.price} \$',
+            style: const TextStyle(color: Colors.black87, fontSize: 12),
+          ),
+          const Spacer(),
+          // Nút thêm vào giỏ
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 4),
+              ),
+              onPressed: onAddToCart,
+              child: const Text('Thêm vào giỏ', style: TextStyle(fontSize: 12, color: Colors.white)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+import 'package:flutter/material.dart';
+import 'product.dart';
+import 'cart_item_widget.dart';
+import 'product_card_widget.dart';
+
+class ShoeStoreScreen extends StatefulWidget {
+  const ShoeStoreScreen({Key? key}) : super(key: key);
+
+  @override
+  State<ShoeStoreScreen> createState() => _ShoeStoreScreenState();
+}
+
+class _ShoeStoreScreenState extends State<ShoeStoreScreen> {
+  // Danh sách sản phẩm cửa hàng
+  final List<Product> _products = [
+    Product(
+      id: '1',
+      name: 'Nike Air Max',
+      price: 120.0,
+      imageUrl: 'https://via.placeholder.com/150',
+    ),
+    Product(
+      id: '2',
+      name: 'Adidas Ultraboost',
+      price: 150.0,
+      imageUrl: 'https://via.placeholder.com/150',
+    ),
+    Product(
+      id: '3',
+      name: 'Puma RS-X',
+      price: 100.0,
+      imageUrl: 'https://via.placeholder.com/150',
+    ),
+    Product(
+      id: '4',
+      name: 'Nike Air Max 2',
+      price: 120.0,
+      imageUrl: 'https://via.placeholder.com/150',
+    ),
+  ];
+
+  // Danh sách giỏ hàng
+  final List<Product> _cartList = [];
+
+  // Thêm vào giỏ hàng (Xử lý tăng số lượng nếu trùng)
+  void _addToCart(Product product) {
+    setState(() {
+      int index = _cartList.indexWhere((item) => item.id == product.id);
+      if (index != -1) {
+        _cartList[index].quantity += 1;
+      } else {
+        _cartList.add(
+          Product(
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            imageUrl: product.imageUrl,
+            quantity: 1,
+          ),
+        );
+      }
+    });
+  }
+
+  // Xóa sản phẩm khỏi giỏ hàng
+  void _removeFromCart(int index) {
+    setState(() {
+      _cartList.removeAt(index);
+    });
+  }
+
+  // Tính tổng tiền
+  double get _totalPrice {
+    return _cartList.fold(0, (sum, item) => sum + (item.price * item.quantity));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Shoe Store'),
+        backgroundColor: Colors.blue,
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Tiêu đề Giỏ hàng
+          const Padding(
+            padding: EdgeInsets.all(12.0),
+            child: Text(
+              'Giỏ hàng',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ),
+
+          // Danh sách giỏ hàng
+          Expanded(
+            child: _cartList.isEmpty
+                ? const Center(child: Text('Giỏ hàng trống'))
+                : ListView.builder(
+                    itemCount: _cartList.length,
+                    itemBuilder: (context, index) {
+                      return CartItemWidget(
+                        product: _cartList[index],
+                        onDelete: () => _removeFromCart(index),
+                      );
+                    },
+                  ),
+          ),
+
+          // Hiển thị tổng tiền
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Tổng tiền:',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  '${_totalPrice.toStringAsFixed(2)} \$',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.red,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const Divider(thickness: 1),
+
+          // Tiêu đề Danh sách giày
+          const Padding(
+            padding: EdgeInsets.all(12.0),
+            child: Text(
+              'Danh sách giày',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ),
+
+          // Danh sách sản phẩm cuộn ngang
+          SizedBox(
+            height: 180,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.only(left: 12, bottom: 12),
+              itemCount: _products.length,
+              itemBuilder: (context, index) {
+                return ProductCardWidget(
+                  product: _products[index],
+                  onAddToCart: () => _addToCart(_products[index]),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+via.placeholder.com
+import 'package:flutter/material.dart';
+
+class Product {
+  final String id;
+  final String name;
+  final double price;
+  final String imageUrl;
+  int quantity;
+
+  Product({
+    required this.id,
+    required this.name,
+    required this.price,
+    required this.imageUrl,
+    this.quantity = 1,
+  });
+}
+
+class CartItemWidget extends StatelessWidget {
+  final Product product;
+  final VoidCallback onDelete;
+
+  const CartItemWidget({
+    Key? key,
+    required this.product,
+    required this.onDelete,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: Image.network(
+                product.imageUrl,
+                width: 60,
+                height: 60,
+                fit: BoxFit.cover,
+                errorBuilder: (context, , _) => const Icon(Icons.error, size: 40),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    product.name,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Giá: ${product.price} \$',
+                    style: const TextStyle(color: Colors.green, fontSize: 13),
+                  ),
+                ],
+              ),
+            ),
+            Text(
+              'Số lượng: ${product.quantity}',
+              style: const TextStyle(color: Colors.blue, fontSize: 13),
+            ),
+            IconButton(
+              icon: const Icon(Icons.delete, color: Colors.red),
+              onPressed: onDelete,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class ProductCardWidget extends StatelessWidget {
+  final Product product;
+  final VoidCallback onAddToCart;
+
+  const ProductCardWidget({
+    Key? key,
+    required this.product,
+    required this.onAddToCart,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 140,
+      margin: const EdgeInsets.only(right: 12),
+      padding: const EdgeInsets.all(😎,
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(😎,
+            child: Image.network(
+              product.imageUrl,
+              height: 80,
+              width: double.infinity,
+              fit: BoxFit.cover,
+              errorBuilder: (context, , _) => const Icon(Icons.error, size: 50),
+            ),
+          ),
+          const SizedBox(height: 😎,
+          Text(
+            product.name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+          ),
+          Text(
+            '${product.price} \$',
+            style: const TextStyle(color: Colors.black87, fontSize: 12),
+          ),
+          const Spacer(),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 4),
+              ),
+              onPressed: onAddToCart,
+              child: const Text('Thêm vào giỏ', style: TextStyle(fontSize: 12, color: Colors.white)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class ShoeStoreScreen extends StatefulWidget {
+  const ShoeStoreScreen({Key? key}) : super(key: key);
+
+  @override
+  State<ShoeStoreScreen> createState() => _ShoeStoreScreenState();
+}
+
+class _ShoeStoreScreenState extends State<ShoeStoreScreen> {
+  final List<Product> _products = [
+    Product(id: '1', name: 'Nike Air Max', price: 120.0, imageUrl: 'https://via.placeholder.com/150'),
+    Product(id: '2', name: 'Adidas Ultraboost', price: 150.0, imageUrl: 'https://via.placeholder.com/150'),
+    Product(id: '3', name: 'Puma RS-X', price: 100.0, imageUrl: 'https://via.placeholder.com/150'),
+    Product(id: '4', name: 'Nike Air Max 2', price: 120.0, imageUrl: 'https://via.placeholder.com/150'),
+  ];
+
+  final List<Product> _cartList = [];
+
+  void _addToCart(Product product) {
+    setState(() {
+      int index = _cartList.indexWhere((item) => item.id == product.id);
+      if (index != -1) {
+        _cartList[index].quantity += 1;
+      } else {
+        _cartList.add(Product(id: product.id, name: product.name, price: product.price, imageUrl: product.imageUrl, quantity: 1));
+      }
+    });
+  }
+
+  void _removeFromCart(int index) {
+    setState(() {
+      _cartList.removeAt(index);
+    });
+  }
+
+  double get _totalPrice => _cartList.fold(0, (sum, item) => sum + (item.price * item.quantity));
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Shoe Store'), backgroundColor: Colors.blue),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(padding: EdgeInsets.all(12.0), child: Text('Giỏ hàng', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
+          Expanded(
+            child: _cartList.isEmpty
+                ? const Center(child: Text('Giỏ hàng trống'))
+                : ListView.builder(
+                    itemCount: _cartList.length,
+                    itemBuilder: (context, index) => CartItemWidget(product: _cartList[index], onDelete: () => _removeFromCart(index)),
+                  ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Tổng tiền:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                Text('${_totalPrice.toStringAsFixed(2)} \$', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.red)),
+              ],
+            ),
+          ),
+          const Divider(thickness: 1),
+          const Padding(padding: EdgeInsets.all(12.0), child: Text('Danh sách giày', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
+          SizedBox(
+            height: 180,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.only(left: 12, bottom: 12),
+              itemCount: _products.length,
+              itemBuilder: (context, index) => ProductCardWidget(product: _products[index], onAddToCart: () => _addToCart(_products[index])),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+via.placeholder.com
